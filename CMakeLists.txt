@@ -14,7 +14,7 @@ ${PROJECT_SOURCE_DIR}/Src/*.cpp
 )
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-set(ArrayPool_PATH External/ArrayPool/Src/)
+set(ArrayPool_PATH ArrayPool/Src/)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build")
 
