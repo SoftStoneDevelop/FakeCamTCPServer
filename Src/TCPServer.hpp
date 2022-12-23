@@ -55,7 +55,9 @@ namespace FakeCamServer
 			bool& recvArg,
 			const std::vector<BaseCommand*>& commands,
 			int& commandIndx,
-			bool& skipToNewline
+			bool& skipToNewline,
+			bool& sendFailed,
+			SOCKET socket
 			);
 
 		void searchCommand(
@@ -64,12 +66,25 @@ namespace FakeCamServer
 			bool& recvArg,
 			const std::vector<BaseCommand*>& commands,
 			int& commandIndx,
-			bool& skipToNewline,
+			int& positionMath
+		);
+
+		bool partFindCommand(
+			ArrayPool::MemoryOwner<char>& recived, int recivedSize, int& recivedIndx,
+			ArrayPool::MemoryOwner<char>& args, int& argsSize,
+			bool& recvArg,
+			const std::vector<BaseCommand*>& commands,
+			int& commandIndx,
 			int& positionMath
 		);
 
 		bool sendResponce(
 			ArrayPool::MemoryOwner<char> responce,
+			SOCKET socket
+		);
+
+		bool sendResponce(
+			std::string&& responce,
 			SOCKET socket
 		);
 	};

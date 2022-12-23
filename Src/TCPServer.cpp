@@ -51,6 +51,7 @@ namespace FakeCamServer
 		hints.ai_family = AF_INET;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
+		hints.ai_flags = AI_PASSIVE;
 
 		addrinfo* result = NULL;
 		iResult = getaddrinfo(NULL, port_.c_str(), &hints, &result);
@@ -197,17 +198,22 @@ namespace FakeCamServer
 		bool skipToNewline = false;
 		while (isRun_ && !sendFailed)
 		{
-			iResult = recv(socket, recvbuf.data(), recvbuf.realSize(), 0);
+			iResult = recv(socket, recvbuf.data(), recvbuf.size(), 0);
 			if (iResult > 0) 
 			{
 				for (int i = 0; i < iResult; i++)
 				{
-					if (skipToNewline)
+					if (recvbuf.data()[i] == '\n')
 					{
-						if (recvbuf.data()[i] == '\n')
+						if (skipToNewline)
+						{
 							skipToNewline = false;
-
-						continue;
+							continue;
+						}
+						else if(!recvArg)
+						{
+							sendFailed = !sendResponce("unknown command\n", socket);
+						}
 					}
 
 					if (recvArg)
@@ -218,7 +224,9 @@ namespace FakeCamServer
 							recvArg,
 							commands,
 							commandIndx,
-							skipToNewline
+							skipToNewline,
+							sendFailed,
+							socket
 						))
 						{
 							//send to command manager
@@ -242,7 +250,6 @@ namespace FakeCamServer
 							recvArg,
 							commands,
 							commandIndx,
-							skipToNewline,
 							positionMath
 						);
 					}
@@ -251,6 +258,9 @@ namespace FakeCamServer
 			else if (iResult == 0)
 			{
 				//Connection closing
+				printf("Connection closed");
+				closesocket(socket);
+				return;
 			}
 			else 
 			{
@@ -275,7 +285,9 @@ namespace FakeCamServer
 		bool& recvArg,
 		const std::vector<BaseCommand*>& commands,
 		int& commandIndx,
-		bool& skipToNewline
+		bool& skipToNewline,
+		bool& sendFailed,
+		SOCKET socket
 	)
 	{
 		for (; recivedIndx < recivedSize; recivedIndx++)
@@ -285,14 +297,22 @@ namespace FakeCamServer
 
 			if (recived.data()[recivedIndx] == '\n')
 			{
-				//reset
-				recvArg = false;
-				return true;
+				if (argsSize < commands[commandIndx]->GetMinArgLength())
+				{
+					sendFailed = !sendResponce("Not enough arguments\n", socket);
+					recvArg = false;
+					return false;
+				}
+				else
+				{
+					recvArg = false;
+					return true;
+				}
 			}
 
 			if (argsSize == commands[commandIndx]->GetMaxArgLength())
 			{
-				//send to client "Wrong arguments length"
+				sendFailed = !sendResponce("Wrong arguments length\n", socket);
 				skipToNewline = true;
 				return false;
 			}
@@ -310,16 +330,57 @@ namespace FakeCamServer
 		bool& recvArg,
 		const std::vector<BaseCommand*>& commands,
 		int& commandIndx,
-		bool& skipToNewline,
 		int& positionMath
 	)
 	{
+		bool needRescan = false;
+		if (!partFindCommand(
+			recived, recivedSize, recivedIndx,
+			args, argsSize,
+			recvArg,
+			commands,
+			commandIndx,
+			positionMath
+			))
+		{
+			commandIndx = 0;
+			needRescan = positionMath != 0;
+			positionMath = 0;
+			recvArg = false;
+			argsSize = 0;
+		}
+
+		if (needRescan)
+		{
+			partFindCommand(
+				recived, recivedSize, recivedIndx,
+				args, argsSize,
+				recvArg,
+				commands,
+				commandIndx,
+				positionMath
+			);
+		}
+	}
+
+	bool TCPServer::partFindCommand(
+		ArrayPool::MemoryOwner<char>& recived, int recivedSize, int& recivedIndx,
+		ArrayPool::MemoryOwner<char>& args, int& argsSize,
+		bool& recvArg,
+		const std::vector<BaseCommand*>& commands,
+		int& commandIndx,
+		int& positionMath
+	)
+	{
+		bool find = false;
 		for (int j = commandIndx; j < commands.size(); j++)
 		{
 			auto command = commands[j];
-			if (command->GetText().size() > positionMath && command->GetText()[positionMath++] == recived.data()[recivedIndx])
+			if (command->GetText().size() > positionMath && command->GetText()[positionMath] == recived.data()[recivedIndx])
 			{
 				commandIndx = j;
+				positionMath++;
+				find = true;
 				if (command->GetText().size() == positionMath)
 				{
 					recvArg = true;
@@ -329,20 +390,29 @@ namespace FakeCamServer
 				}
 				break;
 			}
-
-			commandIndx = 0;
-			if (positionMath != 0)
-			{
-				j = commandIndx;
-			}
-			positionMath = 0;
-			recvArg = false;
-			argsSize = 0;
 		}
+
+		return find;
 	}
 
 	bool TCPServer::sendResponce(
 		ArrayPool::MemoryOwner<char> responce,
+		SOCKET socket
+	)
+	{
+		int iSendResult = send(socket, responce.data(), responce.size(), 0);
+		if (iSendResult == SOCKET_ERROR)
+		{
+			printf("send failed with error: %d\n", WSAGetLastError());
+			closesocket(socket);
+			return false;
+		}
+
+		return true;
+	}
+
+	bool TCPServer::sendResponce(
+		std::string&& responce,
 		SOCKET socket
 	)
 	{
