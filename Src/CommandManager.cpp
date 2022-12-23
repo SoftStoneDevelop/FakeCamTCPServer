@@ -5,8 +5,8 @@
 namespace FakeCamServer
 {
 	CommandManager::CommandManager(
-		FakeCamera& camera, std::shared_ptr<ArrayPool::ArrayPool<char>> pool)
-		: camera_{ camera }, pool_{ pool }
+		std::shared_ptr<FakeCamera> camera, std::shared_ptr<ArrayPool::MemoryOwnerFactory<char>> mof)
+		: camera_{ std::move(camera) }, mof_{ std::move(mof) }
 	{
 		commands_.reserve(6);
 		commands_.push_back(new GetLedColor());

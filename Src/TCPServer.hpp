@@ -5,7 +5,8 @@
 #include<winsock2.h>
 #pragma comment(lib,"ws2_32.lib") //Winsock Library
 
-#include "ArrayPool.hpp"
+#include "MemoryOwnerFactory.hpp"
+#include "CommandManager.hpp"
 
 namespace FakeCamServer
 {
@@ -15,7 +16,8 @@ namespace FakeCamServer
 		TCPServer(
 			std::string&& host,
 			std::string&& port,
-			std::shared_ptr<ArrayPool::ArrayPool<char>> arrayPool
+			std::shared_ptr<ArrayPool::MemoryOwnerFactory<char>> mof,
+			std::shared_ptr<CommandManager> manager
 			) noexcept;
 		~TCPServer();
 
@@ -41,9 +43,34 @@ namespace FakeCamServer
 		std::mutex startMutex_;
 		std::thread* listenThread_ = nullptr;
 
-		std::shared_ptr<ArrayPool::ArrayPool<char>> arrayPool_;
+		std::shared_ptr<ArrayPool::MemoryOwnerFactory<char>> mof_;
+		std::shared_ptr<CommandManager> manager_;
 
 		void listenLoop();
 		void clientLoop(SOCKET socket);
+
+		bool reciveArgs(
+			ArrayPool::MemoryOwner<char>& recived, int recivedSize, int& recivedIndx,
+			ArrayPool::MemoryOwner<char>& args, int& argsSize,
+			bool& recvArg,
+			const std::vector<BaseCommand*>& commands,
+			int& commandIndx,
+			bool& skipToNewline
+			);
+
+		void searchCommand(
+			ArrayPool::MemoryOwner<char>& recived, int recivedSize, int& recivedIndx,
+			ArrayPool::MemoryOwner<char>& args, int& argsSize,
+			bool& recvArg,
+			const std::vector<BaseCommand*>& commands,
+			int& commandIndx,
+			bool& skipToNewline,
+			int& positionMath
+		);
+
+		bool sendResponce(
+			ArrayPool::MemoryOwner<char> responce,
+			SOCKET socket
+		);
 	};
 }//namespace FakeCamServer

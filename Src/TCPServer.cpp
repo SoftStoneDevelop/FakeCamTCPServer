@@ -10,13 +10,15 @@ namespace FakeCamServer
 	TCPServer::TCPServer(
 		std::string&& host,
 		std::string&& port,
-		std::shared_ptr<ArrayPool::ArrayPool<char>> arrayPool
+		std::shared_ptr<ArrayPool::MemoryOwnerFactory<char>> mof,
+		std::shared_ptr<CommandManager> manager
 	) noexcept
 		: 
 		host_{ std::move(host) },
 		port_{ port },
 		listenSocket_{ INVALID_SOCKET },
-		arrayPool_{arrayPool}
+		mof_{std::move(mof)},
+		manager_{std::move(manager)}
 	{
 	}
 
@@ -180,22 +182,71 @@ namespace FakeCamServer
 	void TCPServer::clientLoop(SOCKET socket)
 	{
 		int iResult = 0;
-		int iSendResult = 0;
+		bool sendFailed = false;
 
-		int realSize;
-		char* recvbuf = arrayPool_->Rent(4000, realSize);
-		while (isRun_)
+		auto recvbuf = mof_->rentMemory(4000);
+
+		int positionMath = 0;
+		int commandIndx = 0;
+		auto& commands = manager_->getCommands();
+		
+		bool recvArg = false;
+		ArrayPool::MemoryOwner<char> args = mof_->rentMemory(100);
+		int argsSize = 0;
+
+		bool skipToNewline = false;
+		while (isRun_ && !sendFailed)
 		{
-			iResult = recv(socket, recvbuf, realSize, 0);
+			iResult = recv(socket, recvbuf.data(), recvbuf.realSize(), 0);
 			if (iResult > 0) 
 			{
-				/*iSendResult = send(socket, recvbuf, iResult, 0);
-				if (iSendResult == SOCKET_ERROR) 
+				for (int i = 0; i < iResult; i++)
 				{
-					printf("send failed with error: %d\n", WSAGetLastError());
-					closesocket(socket);
-					break;
-				}*/
+					if (skipToNewline)
+					{
+						if (recvbuf.data()[i] == '\n')
+							skipToNewline = false;
+
+						continue;
+					}
+
+					if (recvArg)
+					{
+						if (reciveArgs(
+							recvbuf, iResult, i,
+							args, argsSize,
+							recvArg,
+							commands,
+							commandIndx,
+							skipToNewline
+						))
+						{
+							//send to command manager
+							//auto future = manager_->enqueue()
+							//wait answer from command manager
+							//MemoryOwner<char> responce = future.get();
+
+							//send
+							//sendFailed = !sendResponce(std::move(responce), socket, iSendResult);
+							if (sendFailed)
+								break;
+							commandIndx = 0;
+							argsSize = 0;
+						}
+					}
+					else
+					{
+						searchCommand(
+							recvbuf, iResult, i,
+							args, argsSize,
+							recvArg,
+							commands,
+							commandIndx,
+							skipToNewline,
+							positionMath
+						);
+					}
+				}
 			}
 			else if (iResult == 0)
 			{
@@ -216,5 +267,93 @@ namespace FakeCamServer
 		}
 
 		closesocket(socket);
+	}
+
+	bool TCPServer::reciveArgs(
+		ArrayPool::MemoryOwner<char>& recived, int recivedSize, int& recivedIndx,
+		ArrayPool::MemoryOwner<char>& args, int& argsSize,
+		bool& recvArg,
+		const std::vector<BaseCommand*>& commands,
+		int& commandIndx,
+		bool& skipToNewline
+	)
+	{
+		for (; recivedIndx < recivedSize; recivedIndx++)
+		{
+			if (recived.data()[recivedIndx] == ' ' && (argsSize == 0 || (recivedIndx >= 0 && recived.data()[recivedIndx - 1] == ' ')))
+				continue;
+
+			if (recived.data()[recivedIndx] == '\n')
+			{
+				//reset
+				recvArg = false;
+				return true;
+			}
+
+			if (argsSize == commands[commandIndx]->GetMaxArgLength())
+			{
+				//send to client "Wrong arguments length"
+				skipToNewline = true;
+				return false;
+			}
+
+			args.data()[argsSize - 1] = recived.data()[recivedIndx];
+			argsSize++;
+		}
+
+		return false;
+	}
+
+	void TCPServer::searchCommand(
+		ArrayPool::MemoryOwner<char>& recived, int recivedSize, int& recivedIndx,
+		ArrayPool::MemoryOwner<char>& args, int& argsSize,
+		bool& recvArg,
+		const std::vector<BaseCommand*>& commands,
+		int& commandIndx,
+		bool& skipToNewline,
+		int& positionMath
+	)
+	{
+		for (int j = commandIndx; j < commands.size(); j++)
+		{
+			auto command = commands[j];
+			if (command->GetText().size() > positionMath && command->GetText()[positionMath++] == recived.data()[recivedIndx])
+			{
+				commandIndx = j;
+				if (command->GetText().size() == positionMath)
+				{
+					recvArg = true;
+					args = std::move(mof_->rentMemory(command->GetMaxArgLength()));
+					argsSize = 0;
+					positionMath = 0;
+				}
+				break;
+			}
+
+			commandIndx = 0;
+			if (positionMath != 0)
+			{
+				j = commandIndx;
+			}
+			positionMath = 0;
+			recvArg = false;
+			argsSize = 0;
+		}
+	}
+
+	bool TCPServer::sendResponce(
+		ArrayPool::MemoryOwner<char> responce,
+		SOCKET socket
+	)
+	{
+		int iSendResult = send(socket, responce.data(), responce.size(), 0);
+		if (iSendResult == SOCKET_ERROR)
+		{
+			printf("send failed with error: %d\n", WSAGetLastError());
+			closesocket(socket);
+			return false;
+		}
+
+		return true;
 	}
 }//namespace FakeCamServer

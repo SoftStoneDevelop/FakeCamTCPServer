@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Camera.hpp"
-#include "ArrayPool.hpp"
+#include "MemoryOwnerFactory.hpp"
 #include <vector>
 
 #include "Commands/BaseCommand.hpp"
@@ -19,7 +19,7 @@ namespace FakeCamServer
 	class CommandManager
 	{
 	public:
-		CommandManager(FakeCamera& camera, std::shared_ptr<ArrayPool::ArrayPool<char>> pool);
+		CommandManager(std::shared_ptr<FakeCamera> camera, std::shared_ptr<ArrayPool::MemoryOwnerFactory<char>> mof);
 		~CommandManager();
 
 		CommandManager(const CommandManager& other) = delete;
@@ -33,9 +33,9 @@ namespace FakeCamServer
 			return commands_;
 		}
 	private:
-		FakeCamera& camera_;
+		std::shared_ptr<FakeCamera> camera_;
 		std::vector<BaseCommand*> commands_;
-		std::shared_ptr<ArrayPool::ArrayPool<char>> pool_;
+		std::shared_ptr<ArrayPool::MemoryOwnerFactory<char>> mof_;
 
 		static bool sortFunc(BaseCommand* i, BaseCommand* j);
 	};

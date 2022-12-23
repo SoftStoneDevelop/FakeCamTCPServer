@@ -7,6 +7,7 @@
 #include<io.h>
 #include<stdio.h>
 #include<winsock2.h>
+#include "MemoryOwnerFactory.hpp"
 
 #pragma comment(lib,"ws2_32.lib") //Winsock Library
 
@@ -14,10 +15,15 @@ int main(int argc, char* argv[])
 {
     try
     {
-        FakeCamServer::FakeCamera camera;
+        auto camera = std::make_shared<FakeCamServer::FakeCamera>();
         auto pool = std::make_shared<ArrayPool::ArrayPool<char>>();
-        FakeCamServer::CommandManager manager(camera, pool);
-        FakeCamServer::TCPServer server("127.0.0.1", "4823", pool);
+        auto mof = std::make_shared<ArrayPool::MemoryOwnerFactory<char>>(std::move(pool));
+        FakeCamServer::TCPServer server(
+            "127.0.0.1",
+            "4823",
+            std::move(mof),
+            std::make_shared<FakeCamServer::CommandManager>(std::move(camera), mof)
+        );
         server.start(nullptr);
         auto c = getchar();
     }
