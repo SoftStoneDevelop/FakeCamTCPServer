@@ -1,15 +1,16 @@
 #pragma once
 
-#include "TCPServer.hpp"
-#include "Camera.hpp"
-#include "CommandManager.hpp"
 #include <iostream>
 #include<io.h>
 #include<stdio.h>
 #include<winsock2.h>
-#include "MemoryOwnerFactory.hpp"
 
 #pragma comment(lib,"ws2_32.lib") //Winsock Library
+
+#include "TCPServer.hpp"
+#include "Camera.hpp"
+#include "CommandManager.hpp"
+#include "MemoryOwnerFactory.hpp"
 
 int main(int argc, char* argv[])
 {
