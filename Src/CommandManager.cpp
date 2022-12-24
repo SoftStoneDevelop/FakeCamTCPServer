@@ -54,7 +54,11 @@ namespace FakeCamServer
 					queue_.pop();
 				}
 
-				CommandResponse response{};
+				auto command = request.command;
+				command->Execute(std::move(request.args), request.argsSize, std::move(request.promise), *camera_);
+				
+				//TEST response
+				/*CommandResponse response{};
 				response.response = mof_->rentMemory(request.command->GetText().size() + 4);
 				response.responseSize = request.command->GetText().size() + 4;
 				response.response.data()[0] = 'O';
@@ -65,7 +69,7 @@ namespace FakeCamServer
 					response.response.data()[i + 3] = request.command->GetText()[i];
 				}
 				response.response.data()[request.command->GetText().size() + 3] = '\n';
-				request.promise.set_value(std::move(response));
+				request.promise.set_value(std::move(response));*/
 			}
 			else
 			{
@@ -75,7 +79,7 @@ namespace FakeCamServer
 		}
 	}
 
-	std::future<CommandManager::CommandResponse> CommandManager::enqueue(
+	std::future<CommandResponse> CommandManager::enqueue(
 		ArrayPool::MemoryOwner<char> args,
 		int argsSize,
 		BaseCommand* command
@@ -85,7 +89,7 @@ namespace FakeCamServer
 		request.args = std::move(args);
 		request.argsSize = argsSize;
 		request.command = command;
-		request.promise = std::promise<CommandManager::CommandResponse>();
+		request.promise = std::promise<CommandResponse>();
 		auto future = request.promise.get_future();
 
 		{

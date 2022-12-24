@@ -1,10 +1,20 @@
 #pragma once
 
 #include <string>
+#include <future>
+
 #include "..\Camera.hpp"
+#include "ArrayPool.hpp"
+#include "MemoryOwner.hpp"
 
 namespace FakeCamServer
 {
+	struct CommandResponse
+	{
+		ArrayPool::MemoryOwner<char> response;
+		int responseSize;
+	};
+
 	class BaseCommand
 	{
 	public:
@@ -18,8 +28,9 @@ namespace FakeCamServer
 		}
 
 		virtual void Execute(
-			char* args, int lengthArgs,
-			char* result, int lengthResult,
+			ArrayPool::MemoryOwner<char> args,
+			int argsSize,
+			std::promise<CommandResponse> promise,
 			FakeCamera& camera
 		) = 0;
 

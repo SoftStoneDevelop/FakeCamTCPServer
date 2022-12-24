@@ -113,6 +113,7 @@ namespace FakeCamServer
 
 		isRun_ = true;
 		listenThread_ = new std::thread(&TCPServer::listenLoop, this);
+		return true;
 	}
 
 	void TCPServer::stop()

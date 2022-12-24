@@ -11,8 +11,9 @@ namespace FakeCamServer
 		SetLedRate() noexcept;
 
 		void Execute(
-			char* args, int lengthArgs,
-			char* result, int lengthResult,
+			ArrayPool::MemoryOwner<char> args,
+			int argsSize,
+			std::promise<CommandResponse> promise,
 			FakeCamera& camera
 		) override;
 	};

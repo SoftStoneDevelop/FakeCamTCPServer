@@ -53,7 +53,7 @@ namespace FakeCamServer
 		);
 
 		void copyToResponseBuffer(
-			CommandManager::CommandResponse response,
+			CommandResponse response,
 			ArrayPool::MemoryOwner<char>& responceBuff,
 			int& responceSize
 		);

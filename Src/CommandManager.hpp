@@ -22,12 +22,6 @@ namespace FakeCamServer
 	class CommandManager
 	{
 	public:		
-		struct CommandResponse
-		{
-			ArrayPool::MemoryOwner<char> response;
-			int responseSize;
-		};
-
 		struct CommandRequest
 		{
 			ArrayPool::MemoryOwner<char> args;
@@ -50,7 +44,7 @@ namespace FakeCamServer
 			return commands_;
 		}
 
-		std::future<CommandManager::CommandResponse> enqueue(
+		std::future<CommandResponse> enqueue(
 			ArrayPool::MemoryOwner<char> args,
 			int argsSize,
 			BaseCommand* command)

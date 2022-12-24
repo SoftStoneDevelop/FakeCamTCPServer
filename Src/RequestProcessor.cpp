@@ -203,7 +203,7 @@ namespace FakeCamServer
 	}
 
 	void RequestProcessor::copyToResponseBuffer(
-		CommandManager::CommandResponse response,
+		CommandResponse response,
 		ArrayPool::MemoryOwner<char>& responceBuff,
 		int& responceSize
 	)
