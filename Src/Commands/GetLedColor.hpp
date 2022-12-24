@@ -14,7 +14,8 @@ namespace FakeCamServer
 			ArrayPool::MemoryOwner<char> args,
 			int argsSize,
 			std::promise<CommandResponse> promise,
-			FakeCamera& camera
+			FakeCamera& camera,
+			const ArrayPool::MemoryOwnerFactory<char>& mof
 		) override;
 	};
 }

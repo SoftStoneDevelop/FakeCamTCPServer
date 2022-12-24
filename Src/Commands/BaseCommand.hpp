@@ -6,6 +6,7 @@
 #include "..\Camera.hpp"
 #include "ArrayPool.hpp"
 #include "MemoryOwner.hpp"
+#include "MemoryOwnerFactory.hpp"
 
 namespace FakeCamServer
 {
@@ -31,7 +32,8 @@ namespace FakeCamServer
 			ArrayPool::MemoryOwner<char> args,
 			int argsSize,
 			std::promise<CommandResponse> promise,
-			FakeCamera& camera
+			FakeCamera& camera,
+			const ArrayPool::MemoryOwnerFactory<char>& mof
 		) = 0;
 
 		const std::string& GetText() const noexcept

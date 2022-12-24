@@ -55,21 +55,7 @@ namespace FakeCamServer
 				}
 
 				auto command = request.command;
-				command->Execute(std::move(request.args), request.argsSize, std::move(request.promise), *camera_);
-				
-				//TEST response
-				/*CommandResponse response{};
-				response.response = mof_->rentMemory(request.command->GetText().size() + 4);
-				response.responseSize = request.command->GetText().size() + 4;
-				response.response.data()[0] = 'O';
-				response.response.data()[1] = 'K';
-				response.response.data()[2] = ' ';
-				for (int i = 0; i < request.command->GetText().size(); i++)
-				{
-					response.response.data()[i + 3] = request.command->GetText()[i];
-				}
-				response.response.data()[request.command->GetText().size() + 3] = '\n';
-				request.promise.set_value(std::move(response));*/
+				command->Execute(std::move(request.args), request.argsSize, std::move(request.promise), *camera_, *mof_);
 			}
 			else
 			{

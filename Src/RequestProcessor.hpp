@@ -46,12 +46,6 @@ namespace FakeCamServer
 			int& responceSize
 		);
 
-		void fillBuffer(
-			std::string&& responce,
-			ArrayPool::MemoryOwner<char>& responceBuff,
-			int& responceSize
-		);
-
 		void copyToResponseBuffer(
 			CommandResponse response,
 			ArrayPool::MemoryOwner<char>& responceBuff,

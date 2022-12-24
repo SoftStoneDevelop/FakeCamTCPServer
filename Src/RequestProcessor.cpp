@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RequestProcessor.hpp"
+#include "Extensions/MemoryOwnerExt.hpp"
 
 namespace FakeCamServer
 {
@@ -53,7 +54,7 @@ namespace FakeCamServer
 				}
 				else
 				{
-					fillBuffer("FALSE unknown command\n", response, responseSize);
+					MemoryExt::fillBuffer("FALSE unknown command\n", response, responseSize, *mof_);
 				}
 			}
 
@@ -150,7 +151,7 @@ namespace FakeCamServer
 			{
 				if (argsSize_ < commands[commandIndx_]->GetMinArgLength())
 				{
-					fillBuffer("FALSE Not enough arguments\n", responce, responceSize);
+					MemoryExt::fillBuffer("FALSE Not enough arguments\n", responce, responceSize, *mof_);
 					recvArg_ = false;
 					return false;
 				}
@@ -163,7 +164,7 @@ namespace FakeCamServer
 
 			if (argsSize_ == commands[commandIndx_]->GetMaxArgLength())
 			{
-				fillBuffer("FALSE Wrong arguments length\n", responce, responceSize);
+				MemoryExt::fillBuffer("FALSE Wrong arguments length\n", responce, responceSize, *mof_);
 				skipToNewline_ = true;
 				return false;
 			}
@@ -173,33 +174,11 @@ namespace FakeCamServer
 				args_ = mof_->newRentMemory(commands[commandIndx_]->GetMaxArgLength());
 			}
 
-			args_->data()[argsSize_ - 1] = requestBuff.data()[requestIndx];
+			args_->data()[argsSize_] = requestBuff.data()[requestIndx];
 			argsSize_++;
 		}
 
 		return false;
-	}
-
-	void RequestProcessor::fillBuffer(
-		std::string&& responce,
-		ArrayPool::MemoryOwner<char>& responceBuff,
-		int& responceSize
-	)
-	{
-		if ((responceBuff.size() - responceSize) < responce.size())
-		{
-			auto newResponce = mof_->rentMemory((responceSize + responce.size()) * 2);
-			if (responceSize > 0)
-			{
-				std::copy(responceBuff.data(), responceBuff.data() + responceSize, newResponce.data());
-			}
-			responceBuff = std::move(newResponce);
-		}
-
-		for (int i = 0; i < responce.size(); i++)
-		{
-			responceBuff.data()[responceSize++] = responce[i];
-		}
 	}
 
 	void RequestProcessor::copyToResponseBuffer(
