@@ -20,11 +20,11 @@ namespace FakeCamServer
 	void RequestProcessor::processData(
 		const ArrayPool::MemoryOwner<char>& requestBuffer,
 		const int requestDataSize,
-		ArrayPool::MemoryOwner<char>& responce,
-		int& responceSize
+		ArrayPool::MemoryOwner<char>& response,
+		int& responseSize
 	)
 	{
-		responceSize = 0;
+		responseSize = 0;
 		for (int i = 0; i < requestDataSize; i++)
 		{
 			if (requestBuffer.data()[i] == '\n')
@@ -34,23 +34,38 @@ namespace FakeCamServer
 					skipToNewline_ = false;
 					continue;
 				}
-				else if (!recvArg_)
+				
+				if (recvArg_)
 				{
-					fillBuffer("FALSE unknown command\n", responce, responceSize);
+					auto command = manager_->getCommands()[commandIndx_];
+					if (command->GetMinArgLength() == 0 && argsSize_ == 0)
+					{
+						auto future = manager_->enqueue(args_ ? std::move(*args_) : ArrayPool::MemoryOwner<char>(), argsSize_, command);
+						args_ = nullptr;
+						recvArg_ = false;
+						auto result = future.get();
+						copyToResponseBuffer(std::move(result), response, responseSize);
+						
+					    commandIndx_ = 0;
+						argsSize_ = 0;
+						continue;
+					}
+				}
+				else
+				{
+					fillBuffer("FALSE unknown command\n", response, responseSize);
 				}
 			}
 
 			if (recvArg_)
 			{
-				if (reciveArgs(requestBuffer, requestDataSize, i, responce, responceSize))
+				if (reciveArgs(requestBuffer, requestDataSize, i, response, responseSize))
 				{
-					//send to command manager
-					//auto future = manager_->enqueue()
-					//wait answer from command manager
-					//MemoryOwner<char> responce = future.get();
-
-					//send
-					//!sendResponce(std::move(responce), socket, iSendResult);
+					auto command = manager_->getCommands()[commandIndx_];
+					auto future = manager_->enqueue(std::move(*args_), argsSize_, command);
+					args_ = nullptr;
+					auto result = future.get();
+					copyToResponseBuffer(std::move(result), response, responseSize);
 
 					commandIndx_ = 0;
 					argsSize_ = 0;
@@ -185,6 +200,26 @@ namespace FakeCamServer
 		{
 			responceBuff.data()[responceSize++] = responce[i];
 		}
+	}
+
+	void RequestProcessor::copyToResponseBuffer(
+		CommandManager::CommandResponse response,
+		ArrayPool::MemoryOwner<char>& responceBuff,
+		int& responceSize
+	)
+	{
+		if ((responceBuff.size() - responceSize) < response.responseSize)
+		{
+			auto newResponse = mof_->rentMemory((responceSize + response.responseSize) * 2);
+			if (responceSize > 0)
+			{
+				std::copy(responceBuff.data(), responceBuff.data() + responceSize, newResponse.data());
+				responceBuff = std::move(newResponse);
+			}
+		}
+
+		std::copy(response.response.data(), response.response.data() + response.responseSize, responceBuff.data() + responceSize);
+		responceSize += response.responseSize;
 	}
 
 }//namespace FakeCamServer

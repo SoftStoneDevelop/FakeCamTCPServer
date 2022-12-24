@@ -52,6 +52,12 @@ namespace FakeCamServer
 			int& responceSize
 		);
 
+		void copyToResponseBuffer(
+			CommandManager::CommandResponse response,
+			ArrayPool::MemoryOwner<char>& responceBuff,
+			int& responceSize
+		);
+
 		std::shared_ptr<CommandManager> manager_;
 		std::shared_ptr<ArrayPool::MemoryOwnerFactory<char>> mof_;
 
