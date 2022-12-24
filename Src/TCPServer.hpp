@@ -48,44 +48,5 @@ namespace FakeCamServer
 
 		void listenLoop();
 		void clientLoop(SOCKET socket);
-
-		bool reciveArgs(
-			ArrayPool::MemoryOwner<char>& recived, int recivedSize, int& recivedIndx,
-			ArrayPool::MemoryOwner<char>& args, int& argsSize,
-			bool& recvArg,
-			const std::vector<BaseCommand*>& commands,
-			int& commandIndx,
-			bool& skipToNewline,
-			bool& sendFailed,
-			SOCKET socket
-			);
-
-		void searchCommand(
-			ArrayPool::MemoryOwner<char>& recived, int recivedSize, int& recivedIndx,
-			ArrayPool::MemoryOwner<char>& args, int& argsSize,
-			bool& recvArg,
-			const std::vector<BaseCommand*>& commands,
-			int& commandIndx,
-			int& positionMath
-		);
-
-		bool partFindCommand(
-			ArrayPool::MemoryOwner<char>& recived, int recivedSize, int& recivedIndx,
-			ArrayPool::MemoryOwner<char>& args, int& argsSize,
-			bool& recvArg,
-			const std::vector<BaseCommand*>& commands,
-			int& commandIndx,
-			int& positionMath
-		);
-
-		bool sendResponce(
-			ArrayPool::MemoryOwner<char> responce,
-			SOCKET socket
-		);
-
-		bool sendResponce(
-			std::string&& responce,
-			SOCKET socket
-		);
 	};
 }//namespace FakeCamServer
