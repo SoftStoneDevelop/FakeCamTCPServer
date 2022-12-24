@@ -165,6 +165,7 @@ namespace FakeCamServer
 			if (argsSize_ == commands[commandIndx_]->GetMaxArgLength())
 			{
 				MemoryExt::fillBuffer("FALSE Wrong arguments length\n", responce, responceSize, *mof_);
+				recvArg_ = false;
 				skipToNewline_ = true;
 				return false;
 			}
