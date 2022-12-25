@@ -1,0 +1,1 @@
+Start-Process -FilePath "out\build\x64-Release\FakeCamServer.exe" -ArgumentList "127.0.0.1","4823"
