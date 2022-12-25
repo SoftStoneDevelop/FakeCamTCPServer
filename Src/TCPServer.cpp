@@ -30,6 +30,7 @@ namespace FakeCamServer
 		: 
 		host_{ std::move(host) },
 		port_{ port },
+        threadPool_(1),
     #if defined(_WIN32)
         listenSocket_{ INVALID_SOCKET },
     #elif defined(__linux__)
@@ -214,17 +215,6 @@ namespace FakeCamServer
 			listenThread_ = nullptr;
 		}
 
-		for (auto i = clients_.begin(); i != clients_.end(); i++)
-		{
-			auto& client = *i;
-			if (client->joinable())
-			{
-				client->join();
-			}
-
-			delete client;
-        }
-
 #if defined(__linux__)
         freeaddrinfo(listenSocketAdress_);
 #endif
@@ -273,7 +263,7 @@ namespace FakeCamServer
             }
 #endif
             printf("accept new client\n");
-            clients_.push_back(new std::thread(&TCPServer::clientLoop, this, newClient));
+            threadPool_.enqueue(&TCPServer::clientLoop, this, newClient);
 		}
 		
 #if defined(_WIN32)

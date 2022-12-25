@@ -5,6 +5,7 @@
 
 #include "MemoryOwnerFactory.hpp"
 #include "CommandManager.hpp"
+#include "ThreadPool.hpp"
 
 #if defined(_WIN32)
 #include<winsock2.h>
@@ -41,6 +42,7 @@ namespace FakeCamServer
 	private:
 		const std::string host_;
 		const std::string port_;
+		ThreadPool threadPool_;
 
 #if defined(_WIN32)
 SOCKET listenSocket_;
@@ -49,7 +51,6 @@ int listenSocket_;
 addrinfo* listenSocketAdress_;
 #endif
 		std::atomic<bool> isRun_ = false;
-		std::vector<std::thread*> clients_;
 
 		std::mutex startMutex_;
 		std::thread* listenThread_ = nullptr;

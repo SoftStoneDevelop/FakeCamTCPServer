@@ -86,7 +86,7 @@ namespace FakeCamServer
 
 		void threadRoutine()
 		{
-			printf("Create thread\n");
+			printf("Create thread in pool\n");
 			auto currentTime = std::chrono::high_resolution_clock::now();
 			bool needDecrease = true;
 			while (isRun_ || !queue_.empty())
@@ -140,7 +140,7 @@ namespace FakeCamServer
 					threadsCount_--;
 				}
 			}
-			printf("Destroy thread\n");
+			printf("Destroy thread in pool\n");
 		}
 
 		void stop() noexcept
