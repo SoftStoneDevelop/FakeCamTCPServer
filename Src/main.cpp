@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include<stdio.h>
+#include <stdio.h>
 
 #include "TCPServer.hpp"
 #include "Camera.hpp"
