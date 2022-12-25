@@ -31,7 +31,7 @@ namespace enums
 		}
 		default:
 		{
-			throw new std::exception("no match found for CameraState");
+            //throw new std::exception("no match found for CameraState");
 		}
 		}
 	}
@@ -68,7 +68,7 @@ namespace enums
 		}
 		default:
 		{
-			throw new std::exception("no match found for CameraLedColor");
+            //throw new std::exception("no match found for CameraLedColor");
 		}
 		}
 	}

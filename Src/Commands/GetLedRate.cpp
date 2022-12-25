@@ -1,8 +1,8 @@
 #pragma once
 
 #include "GetLedRate.hpp"
-#include "enums.hpp"
-#include "Extensions/MemoryOwnerExt.hpp"
+#include "../enums.hpp"
+#include "../Extensions/MemoryOwnerExt.hpp"
 
 namespace FakeCamServer
 {

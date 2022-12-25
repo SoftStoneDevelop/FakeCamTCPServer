@@ -1,7 +1,7 @@
 #pragma once
 
-#include <enums.hpp>
 #include <atomic>
+#include "enums.hpp"
 
 namespace FakeCamServer
 {

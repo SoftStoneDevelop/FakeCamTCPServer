@@ -1,11 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include<io.h>
 #include<stdio.h>
-#include<winsock2.h>
-
-#pragma comment(lib,"ws2_32.lib") //Winsock Library
 
 #include "TCPServer.hpp"
 #include "Camera.hpp"

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CommandManager.hpp"
+#include <algorithm>
 
 namespace FakeCamServer
 {
@@ -19,7 +20,7 @@ namespace FakeCamServer
 		commands_.push_back(new SetLedRate());
 
 		std::sort(commands_.begin(), commands_.end(), sortFunc);
-		routine_ = new std::thread(&CommandManager::routineLoop, this);
+        routine_ = new std::thread(&CommandManager::routineLoop, this);
 	}
 
 	CommandManager::~CommandManager()
@@ -30,10 +31,10 @@ namespace FakeCamServer
 			routine_->join();
 		delete routine_;
 		
-		for each (auto command in commands_)
-		{
-			delete command;
-		}
+        for(auto it = commands_.begin(); it != commands_.end(); it++)
+        {
+            delete *it;
+        }
 	}
 
 	bool CommandManager::sortFunc(BaseCommand* i, BaseCommand* j)

@@ -3,8 +3,8 @@
 #include <string_view>
 
 #include "SetLedColor.hpp"
-#include "enums.hpp"
-#include "Extensions/MemoryOwnerExt.hpp"
+#include "../enums.hpp"
+#include "../Extensions/MemoryOwnerExt.hpp"
 
 namespace FakeCamServer
 {

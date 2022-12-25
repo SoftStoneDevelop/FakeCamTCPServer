@@ -27,6 +27,11 @@ if (WIN32)
 
 elseif (UNIX)
     message(STATUS "CREATING BUILD FOR UNIX")
+
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+
     target_include_directories(${PROJECT_NAME} PUBLIC
       ${PROJECT_SOURCE_DIR}/src
       ${ArrayPool_PATH}

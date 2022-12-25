@@ -4,8 +4,9 @@
 #include <iterator>
 
 #include "SetLedRate.hpp"
-#include "enums.hpp"
-#include "Extensions/MemoryOwnerExt.hpp"
+#include "../enums.hpp"
+#include "../Extensions/MemoryOwnerExt.hpp"
+#include <algorithm>
 
 namespace FakeCamServer
 {

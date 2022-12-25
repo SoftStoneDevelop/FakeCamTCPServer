@@ -3,7 +3,7 @@
 #include <string>
 #include <future>
 
-#include "..\Camera.hpp"
+#include "../Camera.hpp"
 #include "ArrayPool.hpp"
 #include "MemoryOwner.hpp"
 #include "MemoryOwnerFactory.hpp"
