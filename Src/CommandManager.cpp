@@ -44,17 +44,33 @@ namespace FakeCamServer
 
 	void CommandManager::routineLoop()
 	{
-		while (run_ || !queue_.empty())
+		while (true)
 		{
-			if (!queue_.empty())
+			if (!run_)
 			{
-				CommandRequest request{};
 				{
 					std::lock_guard<std::mutex> lg(m_);
+					if (queue_.empty())
+					{
+						break;
+					}
+				}
+			}
+
+			CommandRequest request{};
+			bool haveCommand = false;
+			{
+				std::lock_guard<std::mutex> lg(m_);
+				if (!queue_.empty())
+				{
 					request = std::move(queue_.front());
 					queue_.pop();
+					haveCommand = true;
 				}
+			}
 
+			if (haveCommand)
+			{
 				auto command = request.command;
 				command->Execute(std::move(request.args), request.argsSize, std::move(request.promise), *camera_, *mof_);
 			}
