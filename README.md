@@ -33,9 +33,9 @@ Commands:
 Examples:
 Req – request, Res – response.<br>
 Req: "get-led-state\n"<br>
-Res: "OK on\n"
+Res: "OK on\n"<br><br>
 Req: "set-led-color yellow\n"<br>
-Res: "FAILED\n"
+Res: "FAILED\n"<br>
 
 Server:
 1. The server architecture should make it easy to add new commands and change the logic of the existing ones.
