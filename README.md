@@ -34,9 +34,11 @@ Examples:
 Req – request, Res – response.
 
 Req: "get-led-state\n"
+
 Res: "OK on\n"
 
 Req: "set-led-color yellow\n"
+
 Res: "FAILED\n"
 
 Server:
