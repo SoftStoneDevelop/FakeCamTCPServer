@@ -2,3 +2,6 @@
 [submodule "ArrayPool"]
 	path = ArrayPool
 	url = https://github.com/SoftStoneDevelop/ArrayPool
+[submodule "ThreadPool"]
+	path = ThreadPool
+	url = https://github.com/SoftStoneDevelop/ThreadPool

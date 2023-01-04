@@ -15,6 +15,7 @@ ${PROJECT_SOURCE_DIR}/Src/*.cpp
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 set(ArrayPool_PATH ArrayPool/Src/)
+set(ThreadPool_PATH ThreadPool/Src/)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build")
 
@@ -23,6 +24,7 @@ if (WIN32)
   target_include_directories(${PROJECT_NAME} PUBLIC
     ${PROJECT_SOURCE_DIR}/src
     ${ArrayPool_PATH}
+    ${ThreadPool_PATH}
     )
 elseif (UNIX)
     message(STATUS "CREATING BUILD FOR UNIX")
@@ -33,5 +35,6 @@ elseif (UNIX)
     target_include_directories(${PROJECT_NAME} PUBLIC
       ${PROJECT_SOURCE_DIR}/src
       ${ArrayPool_PATH}
+      ${ThreadPool_PATH}
     )
 endif()

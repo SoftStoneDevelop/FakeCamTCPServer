@@ -42,7 +42,7 @@ namespace FakeCamServer
 	private:
 		const std::string host_;
 		const std::string port_;
-		ThreadPool threadPool_;
+		ThreadPool::ThreadPool threadPool_;
 
 #if defined(_WIN32)
 SOCKET listenSocket_;
