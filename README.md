@@ -1,5 +1,5 @@
 # FakeCamTCPServer
-If you don't know what it is and why - you don't need it, don't watch it.
+Another test task from a nameless company with great ambitions, recognized market leaders and blah blah .. .
 
 | Check | Client OS | Server OS |
 | ------------- | ------------- | ------------- |
