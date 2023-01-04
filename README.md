@@ -31,14 +31,10 @@ Commands:
 | get-led-rate | | OK 0..5, FAILED |get LED rate|
 
 Examples:
-Req – request, Res – response.
-
-Req: "get-led-state\n"
-
+Req – request, Res – response.<br>
+Req: "get-led-state\n"<br>
 Res: "OK on\n"
-
-Req: "set-led-color yellow\n"
-
+Req: "set-led-color yellow\n"<br>
 Res: "FAILED\n"
 
 Server:
