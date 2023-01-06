@@ -295,9 +295,10 @@ namespace FakeCamServer
 			if (iResult > 0) 
 			{
 				processor.processData(recvbuf, iResult, sendbuf, needSendSize);
+                int offset = 0;
 				while (needSendSize != 0)
 				{
-					iSendResult = send(socket, sendbuf.data(), needSendSize, 0);
+					iSendResult = send(socket, sendbuf.data() + offset, needSendSize, 0);
                     if (iSendResult == -1)
 					{
 #if defined(_WIN32)
@@ -311,6 +312,7 @@ namespace FakeCamServer
 						break;
 					}
 					needSendSize -= iSendResult;
+                    offset += iSendResult;
 				}
 			}
 			else if (iResult == 0)
